@@ -17,7 +17,10 @@ class CashierSession extends Model
         'evidence_path', 
         'description', 
         'approved_by', 
-        'approved_at'
+        'approved_at',
+        'shift',
+        'supervisor_id',
+        'supervisor_nip'
     ];
 
     protected $casts = [

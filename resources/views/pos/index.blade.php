@@ -180,18 +180,52 @@
     </div>
 </div>
 
-@if($activeRegister)
+@if($activeSession)
 <div style="width: 100%; max-width: 1200px; margin-bottom: 20px; background: rgba(74, 222, 128, 0.2); border: 1px solid #4ade80; padding: 10px 20px; border-radius: 12px; color: #4ade80; display: flex; justify-content: space-between; align-items: center;">
-    <div><strong>Shift Terbuka</strong> &mdash; Kasir: {{ auth()->user()->name }}</div>
-    <div>Waktu Buka: {{ $activeRegister->opened_at->format('H:i') }} | Modal Awal: Rp {{ number_format($activeRegister->opening_balance, 0, ',', '.') }}</div>
+    <div><strong>Shift Aktif: {{ $activeSession->shift }}</strong> &mdash; Kasir: {{ auth()->user()->name }}</div>
+    <div>Supervisor: {{ $activeSession->supervisor_nip }} | Modal: Rp {{ number_format($activeSession->opening_balance, 0, ',', '.') }}</div>
 </div>
-<!-- Hidden input for cash register ID -->
-<input type="hidden" id="cash_register_id" value="{{ $activeRegister->id }}">
+<input type="hidden" id="cash_session_id" value="{{ $activeSession->id }}">
 @else
-<div style="width: 100%; max-width: 1200px; margin-bottom: 20px; background: rgba(244, 63, 94, 0.2); border: 1px solid #f43f5e; padding: 10px 20px; border-radius: 12px; color: #f43f5e; display: flex; justify-content: space-between; align-items: center;">
-    <div><strong>Shift Belum Dibuka!</strong> &mdash; Silakan buka shift kasir ('Tutup Cash Register') terlebih dahulu jika ingin melacak saldo. Transaksi saat ini tidak akan masuk ke shift manapun.</div>
+<div class="overlay" id="openSessionOverlay" style="display: flex;">
+    <div class="card" style="max-width: 500px; width: 90%; background: #1e293b; border: 1px solid var(--primary);">
+        <h2 style="text-align: center; margin-bottom: 24px;">🔓 Aktivasi Shift Kasir</h2>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem;">
+            Supervisor & Kasir wajib sudah melakukan **Absensi** sebelum membuka terminal.
+        </p>
+        
+        <form id="openSessionForm">
+            <div class="input-group">
+                <label>NIP Kasir (Username/Email)</label>
+                <input type="text" id="cashier_nip" value="{{ auth()->user()->email }}" readonly style="background: rgba(255,255,255,0.05);">
+            </div>
+            
+            <div class="input-group">
+                <label>NIP Penanggung Jawab (Kepala/Wakil Toko)</label>
+                <input type="text" id="supervisor_nip" placeholder="Masukkan NIP Supervisor..." required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 15px;">
+                <div class="input-group">
+                    <label>Shift</label>
+                    <select id="shift" required>
+                        <option value="Pagi">Pagi</option>
+                        <option value="Siang">Siang</option>
+                        <option value="Malam">Malam</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Modal Awal (Rp)</label>
+                    <input type="number" id="opening_balance" value="0" min="0" required>
+                </div>
+            </div>
+
+            <button type="button" onclick="startSession()" class="btn btn-checkout" style="margin-top: 20px;">
+                <span>✅</span> Buka Shift & Mulai POS
+            </button>
+        </form>
+    </div>
 </div>
-<input type="hidden" id="cash_register_id" value="">
 @endif
 
 <div class="layout">
@@ -432,6 +466,44 @@
         }
     }
 
+    async function startSession() {
+        const btn = document.querySelector('#openSessionForm button');
+        const oldText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Memvalidasi Absensi...';
+
+        const payload = {
+            cashier_nip: document.getElementById('cashier_nip').value,
+            supervisor_nip: document.getElementById('supervisor_nip').value,
+            shift: document.getElementById('shift').value,
+            opening_balance: document.getElementById('opening_balance').value
+        };
+
+        try {
+            const res = await fetch('/pos/open-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                location.reload();
+            } else {
+                alert("Gagal Membuka Shift: " + result.message);
+                btn.disabled = false;
+                btn.innerHTML = oldText;
+            }
+        } catch (e) {
+            alert("Terjadi kesalahan koneksi.");
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+        }
+    }
+
     async function checkout() {
         const btn = document.getElementById('checkoutBtn');
         btn.disabled = true;
@@ -443,7 +515,7 @@
             account_id: document.getElementById('account_id').value,
             contact_id: document.getElementById('contact_id').value || null,
             payment_status: document.getElementById('payment_status').value,
-            cash_register_id: document.getElementById('cash_register_id').value || null,
+            cashier_session_id: document.getElementById('cash_session_id') ? document.getElementById('cash_session_id').value : null,
             ...window.currentSummary,
             discount: window.currentSummary.disc // mapping name
         };

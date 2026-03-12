@@ -184,7 +184,7 @@
         
         function setRole(role) {
             document.getElementById('role_category').value = role;
-            document.getElementById('userLabel').innerText = role === 'admin' ? 'Username / ID Admin' : 'NIP / ID Karyawan';
+            document.getElementById('userLabel').innerText = role === 'admin' ? 'NIP / ID Khusus Bos & Pemilik Pusat' : 'NIP / ID Semua Karyawan';
             
             const btnAdmin = document.getElementById('btn-admin');
             const btnKaryawan = document.getElementById('btn-karyawan');

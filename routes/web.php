@@ -77,11 +77,11 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         // Category Validation
         if ($request->role_category === 'admin' && !in_array($user->role, $adminRoles)) {
             \Illuminate\Support\Facades\Auth::logout();
-            return back()->withErrors(['email' => 'Akun Admin Pusat/Owner tidak ditemukan di kategori ini.']);
+            return back()->withErrors(['email' => 'Akses kategori Admin khusus untuk Bos/Pemilik Pusat.']);
         }
         if ($request->role_category === 'karyawan' && !in_array($user->role, $karyawanRoles)) {
             \Illuminate\Support\Facades\Auth::logout();
-            return back()->withErrors(['email' => 'Akun Karyawan tidak ditemukan di kategori ini.']);
+            return back()->withErrors(['email' => 'Pilih kategori Admin jika Anda adalah Pemilik/Bos Pusat.']);
         }
 
         $request->session()->regenerate();
@@ -105,6 +105,13 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
     }
 
     return back()->withErrors(['email' => 'Kredensial atau Peran tidak sesuai.'])->onlyInput('email');
+});
+
+// ---- Modul POS (Terminal Kasir) ----
+Route::middleware(['auth', 'ensure-cashier-session'])->group(function() {
+    Route::get('/pos', [\App\Http\Controllers\POSController::class, 'index'])->name('pos.index');
+    Route::post('/pos', [\App\Http\Controllers\POSController::class, 'store'])->name('pos.store');
+    Route::post('/pos/open-session', [\App\Http\Controllers\POSController::class, 'openSession'])->withoutMiddleware('ensure-cashier-session')->name('pos.open-session');
 });
 
 Route::post('/logout', function (\Illuminate\Http\Request $request) {
