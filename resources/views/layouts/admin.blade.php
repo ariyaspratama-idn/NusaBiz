@@ -391,7 +391,13 @@
             </div>
         </a>
         <nav class="sidebar-nav">
-            <div class="nav-section-title">Ringkasan Bisnis</div>
+            @php
+                $role = auth()->user()->role ?? '';
+                $isAdmin = in_array($role, ['admin-pusat', 'owner', 'SUPER_ADMIN', 'ADMIN_OPERASIONAL', 'EDITOR_KONTEN']);
+            @endphp
+
+            @if($isAdmin)
+                <div class="nav-section-title">Ringkasan Bisnis</div>
             <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="fa-solid fa-house-chimney"></i> <span>Dashboard Utama</span>
             </a>
@@ -481,6 +487,15 @@
                 @php $unreadChats = \App\Models\ChatMessage::where('sender_type', 'visitor')->where('is_read', false)->count(); @endphp
                 @if($unreadChats > 0) <span id="sidebar-chat-badge" class="badge" style="background:var(--primary); color:white; font-size:10px; padding:2px 8px; border-radius:50px; margin-left:auto;">{{ $unreadChats }}</span> @endif
             </a>
+            @else
+            <div class="nav-section-title">Menu Utama</div>
+            <a href="{{ route('karyawan.dashboard') }}" class="nav-item {{ request()->routeIs('karyawan.dashboard') ? 'active' : '' }}">
+                <i class="fa-solid fa-house-user"></i> <span>Terminal Absensi</span>
+            </a>
+            <a href="{{ route('karyawan.payroll') }}" class="nav-item {{ request()->routeIs('karyawan.payroll') ? 'active' : '' }}">
+                <i class="fa-solid fa-file-invoice-dollar"></i> <span>Riwayat Gaji</span>
+            </a>
+            @endif
         </nav>
         <div class="sidebar-footer">
             <div class="sidebar-user" style="display:flex; align-items:center; gap:12px; padding:16px; background: rgba(255,255,255,0.03); border-radius:16px; margin:10px;">
