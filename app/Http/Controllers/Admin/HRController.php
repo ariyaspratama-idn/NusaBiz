@@ -57,27 +57,57 @@ class HRController extends Controller
         $karyawan = Karyawan::where('user_id', auth()->id())->first();
         if (!$karyawan) return response()->json(['message' => 'Data karyawan tidak ditemukan.'], 404);
 
+        $tanggal = now()->toDateString();
+        $jamSekarang = now()->toTimeString();
+        
+        // Cari apakah sudah ada absen hari ini
+        $absensi = Absensi::where('karyawan_id', $karyawan->id)
+            ->where('tanggal', $tanggal)
+            ->first();
+
         $foto = null;
         if ($request->has('foto') && $request->foto) {
             $foto = $this->saveAndOptimizeBase64($request->foto, 'absensi');
         }
 
-        $absensi = Absensi::create([
-            'karyawan_id' => $karyawan->id,
-            'tanggal' => now()->toDateString(),
-            'jam_masuk' => now()->toTimeString(),
-            'lat_masuk' => $request->lat,
-            'lon_masuk' => $request->lon,
-            'foto_masuk' => $foto,
-            'status' => 'hadir',
-        ]);
-
-        // Notifikasi ke Telegram Admin jika ada
-        if ($karyawan->telegram_chat_id) {
-            $this->telegram->sendMessage($karyawan->telegram_chat_id, "Halo {$karyawan->nama_lengkap}, Anda berhasil absen masuk pada pukul " . now()->format('H:i'));
+        if (!$absensi) {
+            // Absen Masuk
+            $absensi = Absensi::create([
+                'karyawan_id' => $karyawan->id,
+                'tanggal' => $tanggal,
+                'jam_masuk' => $jamSekarang,
+                'lat_masuk' => $request->lat,
+                'lon_masuk' => $request->lon,
+                'foto_masuk' => $foto,
+                'status' => 'hadir',
+                'tenant_id' => $karyawan->tenant_id,
+                'branch_id' => $karyawan->branch_id,
+            ]);
+            $tipe = "Masuk";
+        } else {
+            // Absen Pulang
+            $absensi->update([
+                'jam_pulang' => $jamSekarang,
+                'lat_pulang' => $request->lat,
+                'lon_pulang' => $request->lon,
+                'foto_pulang' => $foto,
+            ]);
+            $tipe = "Pulang";
         }
 
-        return response()->json(['message' => 'Absensi berhasil dicatat.', 'data' => $absensi]);
+        // Notifikasi ke Telegram Karyawan jika sudah terkoneksi
+        if ($karyawan->telegram_chat_id) {
+            $message = "✅ <b>Konfirmasi Absensi</b>\n\n";
+            $message .= "Halo <b>{$karyawan->nama_lengkap}</b>,\n";
+            $message .= "Anda berhasil melakukan absen <b>{$tipe}</b> pada:\n";
+            $message .= "📅 Tanggal: " . now()->translatedFormat('d F Y') . "\n";
+            $message .= "⏰ Jam: " . now()->format('H:i') . " WIB\n\n";
+            $message .= "<i>Tetap semangat bekerja!</i>";
+            
+            $this->telegram->sendMessage($karyawan->telegram_chat_id, $message);
+        }
+
+        return response()->json(['message' => "Absensi {$tipe} berhasil dicatat.", 'data' => $absensi]);
     }
 
     /**

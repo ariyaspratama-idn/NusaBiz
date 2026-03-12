@@ -32,7 +32,7 @@ class CmsController extends Controller
             'status'           => 'required|in:draft,published',
             'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:300',
-            'featured_image'   => 'nullable|image|max:2048',
+            'featured_image'   => 'nullable|image|max:22048',
         ]);
 
         if ($request->hasFile('featured_image')) {

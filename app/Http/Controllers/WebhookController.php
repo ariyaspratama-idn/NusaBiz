@@ -54,6 +54,20 @@ class WebhookController extends Controller
             'user_id' => 1, // System/Admin user
         ]);
 
+        // Notifikasi ke Telegram Admin
+        $adminChatId = env('ADMIN_TELEGRAM_CHAT_ID');
+        if ($adminChatId) {
+            $telegram = app(\App\Services\TelegramService::class);
+            $msg = "📢 <b>Pengaduan Otomatis Baru</b>\n\n";
+            $msg .= "Sumber: <b>{$complaint->source}</b>\n";
+            $msg .= "Cabang: <b>{$branch->nama_cabang}</b>\n";
+            $msg .= "Pesan: <i>\"{$validated['description']}\"</i>\n";
+            if ($complaint->external_url) {
+                $msg .= "\n🔗 <a href='{$complaint->external_url}'>Lihat Sumber Asli</a>";
+            }
+            $telegram->sendMessage($adminChatId, $msg);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Complaint recorded automatically',

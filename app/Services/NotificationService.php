@@ -34,8 +34,15 @@ class NotificationService
         // 1. Kirim via WhatsApp (Fonnte)
         self::sendWhatsApp($order->customer_phone, $message);
 
-        // 2. Kirim via Email (Jika ada sistem email)
-        // Mail::to($order->customer_email)->send(new \App\Mail\OrderUpdated($order));
+        // 2. Kirim via Email
+        try {
+            Mail::raw($message, function($mail) use ($order) {
+                $mail->to($order->customer_email)
+                     ->subject("Update Pesanan NusaBiz #{$order->order_number}");
+            });
+        } catch (\Exception $e) {
+            Log::warning("Gagal mengirim Email ke {$order->customer_email}: " . $e->getMessage());
+        }
     }
 
     /**
@@ -50,6 +57,7 @@ class NotificationService
         }
 
         try {
+            /** @var \Illuminate\Http\Client\Response $response */
             $response = Http::withHeaders([
                 'Authorization' => $token,
             ])->post('https://api.fonnte.com/send', [
