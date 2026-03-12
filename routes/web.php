@@ -67,23 +67,36 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         'role_category' => 'required|in:admin,karyawan',
     ]);
 
-    if (\Illuminate\Support\Facades\Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-        $user = auth()->user();
+    $input = $request->email;
+    $password = $request->password;
+
+    // 1. Coba cari user berdasarkan email langsung
+    $user = \App\Models\User::where('email', $input)->first();
+
+    // 2. Jika tidak ketemu, coba cari berdasarkan NIP di tabel karyawans
+    if (!$user) {
+        $karyawan = \App\Models\Karyawan::where('nip', $input)->first();
+        if ($karyawan) {
+            $user = $karyawan->user;
+        }
+    }
+
+    // 3. Jika user ditemukan, lakukan verifikasi password & peran
+    if ($user && \Illuminate\Support\Facades\Hash::check($password, $user->password)) {
         
         // Define Role Groups
         $adminRoles = ['SUPER_ADMIN', 'admin-pusat', 'owner'];
         $karyawanRoles = ['karyawan', 'kasir', 'kepala-cabang', 'wakil-kepala-cabang', 'mechanic'];
 
-        // Category Validation
+        // Category Validation (User must choose correct login category)
         if ($request->role_category === 'admin' && !in_array($user->role, $adminRoles)) {
-            \Illuminate\Support\Facades\Auth::logout();
-            return back()->withErrors(['email' => 'Akses kategori Admin khusus untuk Bos/Pemilik Pusat.']);
+            return back()->withErrors(['email' => 'Akun Anda (' . $user->role . ') harus login melalui kategori Karyawan.']);
         }
         if ($request->role_category === 'karyawan' && !in_array($user->role, $karyawanRoles)) {
-            \Illuminate\Support\Facades\Auth::logout();
-            return back()->withErrors(['email' => 'Pilih kategori Admin jika Anda adalah Pemilik/Bos Pusat.']);
+            return back()->withErrors(['email' => 'Akun Anda (' . $user->role . ') harus login melalui kategori Admin Pusat.']);
         }
 
+        \Illuminate\Support\Facades\Auth::login($user);
         $request->session()->regenerate();
 
         // Device Binding Logic
@@ -108,7 +121,7 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         return $user->role === 'customer' ? redirect()->route('customer.dashboard') : redirect()->route('home');
     }
 
-    return back()->withErrors(['email' => 'Kredensial atau Peran tidak sesuai.'])->onlyInput('email');
+    return back()->withErrors(['email' => 'Kredensial (ID/Password) tidak ditemukan di database pusat.'])->onlyInput('email');
 });
 
 // ---- Modul POS (Terminal Kasir) ----

@@ -68,7 +68,7 @@ class InitialAccountSeeder extends Seeder
         ];
 
         foreach ($users as $userData) {
-            User::updateOrCreate(
+            $user = User::updateOrCreate(
                 ['email' => $userData['email']],
                 [
                     'name' => $userData['name'],
@@ -79,6 +79,26 @@ class InitialAccountSeeder extends Seeder
                     'is_active' => true,
                 ]
             );
+
+            // Jika role adalah karyawan operasional, buat data di tabel karyawans
+            $karyawanRoles = ['karyawan', 'kasir', 'kepala-cabang', 'wakil-kepala-cabang', 'mechanic'];
+            if (in_array($userData['role'], $karyawanRoles)) {
+                // Generate NIP based on role and name initials or just use email prefix
+                $nip = strtoupper(str_replace(['@nusabiz.com', '.'], ['', ''], $userData['email'])) . '007';
+                
+                \App\Models\Karyawan::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'nip' => $nip,
+                        'nama_lengkap' => $user->name,
+                        'tenant_id' => $tenant->id,
+                        'branch_id' => $branch->id,
+                        'jabatan' => ucfirst(str_replace('-', ' ', $user->role)),
+                        'status' => 'aktif',
+                        'gaji_pokok' => 5000000,
+                    ]
+                );
+            }
         }
 
         $this->command->info('Initial roles and accounts created successfully!');
