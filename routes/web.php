@@ -97,8 +97,12 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         }
 
         // Redirect based on role
-        if (in_array($user->role, array_merge($adminRoles, $karyawanRoles))) {
+        if (in_array($user->role, $adminRoles)) {
             return redirect()->route('admin.dashboard');
+        }
+
+        if (in_array($user->role, $karyawanRoles)) {
+            return redirect()->route('karyawan.dashboard');
         }
 
         return $user->role === 'customer' ? redirect()->route('customer.dashboard') : redirect()->route('home');
@@ -143,6 +147,18 @@ Route::middleware(['auth', 'role:SUPER_ADMIN,ADMIN_OPERASIONAL,EDITOR_KONTEN'])
         $latestOrders = \App\Models\EcOrder::latest()->limit(5)->get();
         return view('admin.dashboard', compact('stats', 'latestOrders'));
     })->name('dashboard');
+
+    /* ============================================================
+     *  KARYAWAN DASHBOARD (Auth + Karyawan Role Required)
+     * ============================================================ */
+    Route::middleware(['auth', 'role:karyawan,kasir,kepala-cabang,wakil-kepala-cabang,mechanic'])
+        ->prefix('karyawan-dashboard')
+        ->name('karyawan.')
+        ->group(function () {
+            
+        Route::get('/', [\App\Http\Controllers\Karyawan\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/payroll', [\App\Http\Controllers\Karyawan\DashboardController::class, 'payroll'])->name('payroll');
+    });
 
     // ---- Manajemen Produk ----
     Route::resource('products', AdminProductController::class);
