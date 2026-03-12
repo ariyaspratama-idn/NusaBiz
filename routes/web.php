@@ -186,6 +186,13 @@ Route::middleware(['auth', 'role:SUPER_ADMIN,ADMIN_OPERASIONAL,EDITOR_KONTEN,adm
         Route::get('analysis/overview', [\App\Http\Controllers\Admin\AnalysisController::class, 'overview'])->name('analysis.overview');
         Route::get('analysis/maintenance', [\App\Http\Controllers\Admin\AnalysisController::class, 'maintenanceAnalytics'])->name('analysis.maintenance');
 
+        // ---- Operasional ----
+        Route::get('operations', [OperationalController::class, 'index'])->name('operations.index');
+        Route::post('operations/attendance', [OperationalController::class, 'attendance'])->name('operations.attendance');
+        Route::post('operations/sop', [OperationalController::class, 'sopLog'])->name('operations.sop');
+        Route::post('operations/complaint', [OperationalController::class, 'complaint'])->name('operations.complaint');
+        Route::post('operations/stock', [OperationalController::class, 'stockRequest'])->name('operations.stock');
+
         // ---- Global Stats ----
         Route::get('global-stats', function () {
             return response()->json([
@@ -219,13 +226,6 @@ Route::middleware(['auth', 'role:SUPER_ADMIN,ADMIN_OPERASIONAL,EDITOR_KONTEN,adm
         Route::get('reports/complaints-monitor', fn() => view('reports.complaint_monitor'))->name('reports.complaints_monitor');
         Route::get('reports/stock-monitor', fn() => view('reports.stock_monitor'))->name('reports.stock_monitor');
         Route::get('reconciliation', fn() => view('reconciliation.index'))->name('reconciliation.index');
-
-        // Operasional
-        Route::get('operations', [OperationalController::class, 'index'])->name('operations.index');
-        Route::post('operations/attendance', [OperationalController::class, 'attendance'])->name('operations.attendance');
-        Route::post('operations/sop', [OperationalController::class, 'sopLog'])->name('operations.sop');
-        Route::post('operations/complaint', [OperationalController::class, 'complaint'])->name('operations.complaint');
-        Route::post('operations/stock', [OperationalController::class, 'stockRequest'])->name('operations.stock');
     });
 
 /* ============================================================
