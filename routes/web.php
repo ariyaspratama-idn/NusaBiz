@@ -146,7 +146,12 @@ Route::middleware(['auth', 'role:SUPER_ADMIN,ADMIN_OPERASIONAL,EDITOR_KONTEN,adm
     Route::patch('orders/{order}/verify-payment', [AdminOrderController::class, 'verifyPayment'])->name('orders.verify-payment');
 
     Route::get('cms/articles', [CmsController::class, 'articles'])->name('cms.articles');
+    Route::get('cms/testimonials', [CmsController::class, 'testimonials'])->name('cms.testimonials');
+    Route::get('cms/settings', [CmsController::class, 'settings'])->name('cms.settings');
+    Route::post('cms/settings', [CmsController::class, 'updateSettings'])->name('cms.settings.update');
+    
     Route::resource('cms/articles', CmsController::class)->names('cms.articles_resource'); // Avoid conflict
+    Route::resource('cms/testimonials', CmsController::class)->names('cms.testimonials_resource'); 
     
     Route::get('chat', [ChatPanelController::class, 'index'])->name('chat.index');
     Route::get('chat/{session}', [ChatPanelController::class, 'show'])->name('chat.show');
