@@ -164,6 +164,15 @@
             <button type="submit" class="btn btn-primary w-100 mt-2 py-3 shadow-primary" style="border-radius: 16px;">
                 Masuk Sistem
             </button>
+
+            <div class="mt-4 pt-2 border-top border-light">
+                <a href="{{ route('pos.index') }}" class="btn btn-outline-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2" 
+                   style="border-radius: 16px; border: 2px solid #4f46e5; color: #4f46e5; background: rgba(79, 70, 229, 0.05); font-weight: 600; transition: all 0.3s;">
+                    <i data-lucide="monitor" style="width: 20px;"></i>
+                    Buka Terminal POS Kasir
+                </a>
+                <p class="text-center text-secondary small mt-2">Akses cepat khusus terminal kasir & outlet.</p>
+            </div>
         </form>
     </div>
     
