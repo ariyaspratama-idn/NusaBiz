@@ -199,10 +199,51 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
 });
 
 /* ============================================================
- *  PUBLIC API & UTILS
+ *  LIVE CHAT: Public Visitor API
  * ============================================================ */
 Route::prefix('chat')->name('chat.visitor.')->group(function () {
-    Route::post('/init', function() { /* ... */ })->name('init');
+    Route::post('/init', function (\Illuminate\Http\Request $request) {
+        $key = $request->session()->getId();
+        $session = \App\Models\ChatSession::firstOrCreate(
+            ['session_key' => $key],
+            [
+                'visitor_name' => 'Guest_' . substr($key, 0, 6),
+                'status' => 'active', 
+                'last_activity_at' => now()
+            ]
+        );
+        $messages = $session->messages()->orderBy('created_at')->get();
+        $setting = \App\Models\ChatSetting::first();
+        return response()->json([
+            'session_id' => $session->id,
+            'messages'   => $messages,
+            'is_online'  => $setting->is_online ?? true,
+        ]);
+    })->name('init');
+
+    Route::post('/send', function (\Illuminate\Http\Request $request) {
+        $request->validate(['message' => 'required|string|max:2000']);
+        $key = $request->session()->getId();
+        $session = \App\Models\ChatSession::where('session_key', $key)->firstOrFail();
+        $msg = \App\Models\ChatMessage::create([
+            'session_id'  => $session->id,
+            'sender_type' => 'visitor',
+            'message'     => $request->message,
+        ]);
+        $session->update(['last_activity_at' => now()]);
+        return response()->json(['success' => true, 'message_id' => $msg->id]);
+    })->name('send');
+
+    Route::get('/messages', function (\Illuminate\Http\Request $request) {
+        $key = $request->session()->getId();
+        $session = \App\Models\ChatSession::where('session_key', $key)->first();
+        if (!$session) return response()->json(['messages' => []]);
+        $messages = $session->messages()
+            ->orderBy('created_at')
+            ->when($request->filled('after_id'), fn($q) => $q->where('id', '>', $request->after_id))
+            ->get();
+        return response()->json(['messages' => $messages]);
+    })->name('messages');
 });
 
 Route::get('/lang/{locale}', function ($locale) {
