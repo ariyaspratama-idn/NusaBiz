@@ -506,9 +506,6 @@
         <header class="topbar">
             <div class="topbar-title">@yield('page_title', 'Dashboard')</div>
             <div class="topbar-actions">
-                <a href="{{ route('home') }}" class="btn btn-outline" target="_blank" style="padding: 8px 16px; font-size:13px;">
-                    <i class="fa-solid fa-globe"></i> <span>Lihat Website</span>
-                </a>
                 <div class="notification-wrapper" style="position:relative;">
                     <button id="notiBtn" class="icon-btn" style="width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:white;color:var(--text-muted);cursor:pointer;position:relative;transition:var(--transition);" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
                         <i class="fa-regular fa-bell"></i>
