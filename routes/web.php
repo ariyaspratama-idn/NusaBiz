@@ -112,11 +112,13 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
 });
 
 // ---- Modul POS (Terminal Kasir) ----
+Route::get('/pos', [\App\Http\Controllers\POSController::class, 'index'])->name('pos.index');
+
 Route::middleware(['auth', 'ensure-cashier-session'])->group(function() {
-    Route::get('/pos', [\App\Http\Controllers\POSController::class, 'index'])->name('pos.index');
     Route::post('/pos', [\App\Http\Controllers\POSController::class, 'store'])->name('pos.store');
-    Route::post('/pos/open-session', [\App\Http\Controllers\POSController::class, 'openSession'])->withoutMiddleware('ensure-cashier-session')->name('pos.open-session');
 });
+
+Route::post('/pos/open-session', [\App\Http\Controllers\POSController::class, 'openSession'])->name('pos.open-session');
 
 Route::post('/logout', function (\Illuminate\Http\Request $request) {
     \Illuminate\Support\Facades\Auth::logout();

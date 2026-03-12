@@ -15,15 +15,18 @@ class POSController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $activeSession = null;
         
-        // Cek Sesi Kasir yang aktif
-        $activeSession = \App\Models\CashierSession::where('user_id', $user->id)
-                            ->where('status', 'OPEN')
-                            ->whereNull('closed_at')
-                            ->first();
+        if ($user) {
+            // Cek Sesi Kasir yang aktif
+            $activeSession = \App\Models\CashierSession::where('user_id', $user->id)
+                                ->where('status', 'OPEN')
+                                ->whereNull('closed_at')
+                                ->first();
+        }
 
-        // Jika tidak ada sesi aktif, kita tetap biarkan masuk tapi view akan menampilkan modal
-        
+        // Ambil data pendukung (branches/accounts)
+        // Jika belum login, gunakan default (Cabang Utama)
         if ($user && $user->role !== User::ROLE_SUPER_ADMIN && $user->branch_id) {
             $branches = Branch::where('id', $user->branch_id)->where('is_active', true)->get();
         } else {
@@ -51,42 +54,52 @@ class POSController extends Controller
             'opening_balance' => 'required|numeric|min:0',
         ]);
 
-        // 1. Cari User Kasir & Supervisor
-        $cashier = User::where('email', $request->cashier_nip)->first(); // Asumsi NIP di email atau field lain
-        $supervisor = User::where('email', $request->supervisor_nip)->first();
+        // 1. Cari Karyawan Berdasarkan NIP
+        $cashierEmp = \App\Models\Karyawan::where('nip', $request->cashier_nip)->first();
+        $supervisorEmp = \App\Models\Karyawan::where('nip', $request->supervisor_nip)->first();
 
-        if (!$cashier || !$supervisor) {
+        if (!$cashierEmp || !$supervisorEmp) {
             return response()->json(['success' => false, 'message' => 'NIP Kasir atau Penanggung Jawab tidak ditemukan.'], 422);
         }
 
+        $cashier = $cashierEmp->user;
+        $supervisor = $supervisorEmp->user;
+
+        if (!$cashier || !$supervisor) {
+            return response()->json(['success' => false, 'message' => 'User terkait NIP tidak ditemukan.'], 422);
+        }
+
         // 2. Cek Role Supervisor
-        if (!$supervisor->isBranchHead()) {
+        if (!$supervisor->isBranchHead()) { // isBranchHead usually checks roles like 'kepala-cabang'
             return response()->json(['success' => false, 'message' => 'Penanggung Jawab harus Kepala/Wakil Toko.'], 422);
         }
 
-        // 3. Validasi Absensi (Khusus untuk login Karyawan)
+        // 3. Validasi Absensi
         $today = now()->toDateString();
         
-        $cashierAtt = \App\Models\Attendance::where('user_id', $cashier->id)
-            ->where('date', $today)
-            ->whereNotNull('clock_in')
-            ->whereNull('clock_out')
+        $cashierAtt = \App\Models\Absensi::where('karyawan_id', $cashierEmp->id)
+            ->where('tanggal', $today)
+            ->whereNotNull('jam_masuk')
+            ->whereNull('jam_pulang')
             ->first();
             
-        $supervisorAtt = \App\Models\Attendance::where('user_id', $supervisor->id)
-            ->where('date', $today)
-            ->whereNotNull('clock_in')
-            ->whereNull('clock_out')
+        $supervisorAtt = \App\Models\Absensi::where('karyawan_id', $supervisorEmp->id)
+            ->where('tanggal', $today)
+            ->whereNotNull('jam_masuk')
+            ->whereNull('jam_pulang')
             ->first();
 
         if (!$cashierAtt) {
-            return response()->json(['success' => false, 'message' => 'Kasir belum melakukan Absen (Clock-in) hari ini.'], 422);
+            return response()->json(['success' => false, 'message' => 'Kasir (' . $cashierEmp->nama_lengkap . ') belum absen Masuk hari ini.'], 422);
         }
         if (!$supervisorAtt) {
-            return response()->json(['success' => false, 'message' => 'Penanggung Jawab belum melakukan Absen (Clock-in) hari ini.'], 422);
+            return response()->json(['success' => false, 'message' => 'Penanggung Jawab (' . $supervisorEmp->nama_lengkap . ') belum absen Masuk hari ini.'], 422);
         }
 
-        // 4. Buat Sesi Kasir
+        // 4. Otomatis Login Kasir
+        \Illuminate\Support\Facades\Auth::login($cashier);
+
+        // 5. Buat Sesi Kasir
         $session = \App\Models\CashierSession::create([
             'user_id' => $cashier->id,
             'branch_id' => $cashier->branch_id,
@@ -100,7 +113,7 @@ class POSController extends Controller
 
         return response()->json([
             'success' => true, 
-            'message' => 'Sesi Kasir Berhasil Dibuka!',
+            'message' => 'Akses POS Berhasil! Selamat bertugas.',
             'session' => $session
         ]);
     }

@@ -182,27 +182,27 @@
 
 @if($activeSession)
 <div style="width: 100%; max-width: 1200px; margin-bottom: 20px; background: rgba(74, 222, 128, 0.2); border: 1px solid #4ade80; padding: 10px 20px; border-radius: 12px; color: #4ade80; display: flex; justify-content: space-between; align-items: center;">
-    <div><strong>Shift Aktif: {{ $activeSession->shift }}</strong> &mdash; Kasir: {{ auth()->user()->name }}</div>
+    <div><strong>Shift Aktif: {{ $activeSession->shift }}</strong> &mdash; Kasir: {{ $activeSession->user->name }}</div>
     <div>Supervisor: {{ $activeSession->supervisor_nip }} | Modal: Rp {{ number_format($activeSession->opening_balance, 0, ',', '.') }}</div>
 </div>
 <input type="hidden" id="cash_session_id" value="{{ $activeSession->id }}">
 @else
 <div class="overlay" id="openSessionOverlay" style="display: flex;">
     <div class="card" style="max-width: 500px; width: 90%; background: #1e293b; border: 1px solid var(--primary);">
-        <h2 style="text-align: center; margin-bottom: 24px;">🔓 Aktivasi Shift Kasir</h2>
+        <h2 style="text-align: center; margin-bottom: 24px;">🔓 Aktivasi Terminal Toko</h2>
         <p style="text-align: center; color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem;">
-            Supervisor & Kasir wajib sudah melakukan **Absensi** sebelum membuka terminal.
+            Kasir & Penanggung Jawab wajib **Absen Masuk** terlebih dahulu.
         </p>
         
         <form id="openSessionForm">
             <div class="input-group">
-                <label>NIP Kasir (Username/Email)</label>
-                <input type="text" id="cashier_nip" value="{{ auth()->user()->email }}" readonly style="background: rgba(255,255,255,0.05);">
+                <label>Nomor Induk Pegawai (NIP) Kasir</label>
+                <input type="text" id="cashier_nip" value="{{ auth()->user() ? auth()->user()->email : '' }}" placeholder="Contoh: KSR001" required>
             </div>
             
             <div class="input-group">
-                <label>NIP Penanggung Jawab (Kepala/Wakil Toko)</label>
-                <input type="text" id="supervisor_nip" placeholder="Masukkan NIP Supervisor..." required>
+                <label>NIP Penanggung Jawab Outlet</label>
+                <input type="text" id="supervisor_nip" placeholder="Masukkan NIP Kepala Toko..." required>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 15px;">
