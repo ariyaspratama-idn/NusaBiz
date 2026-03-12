@@ -8,16 +8,20 @@
     <!-- Stat Cards -->
     <div class="stat-card">
         <div class="stat-icon" style="background:rgba(99,102,241,0.1); color:var(--primary);"><i class="fa-solid fa-chart-line"></i></div>
-        <div style="color:var(--text-muted); font-size:14px; font-weight:600;">Tren Pendapatan</div>
-        <div style="font-size:28px; font-weight:800; margin-top:8px;">+12.5%</div>
-        <div style="font-size:12px; color:var(--success); margin-top:4px;"><i class="fa-solid fa-arrow-up"></i> Naik dari bulan lalu</div>
+        <div style="color:var(--text-muted); font-size:14px; font-weight:600;">Pendapatan {{ now()->format('F') }}</div>
+        <div style="font-size:28px; font-weight:800; margin-top:8px;">
+            Rp {{ number_format($trenPendapatan->last()->pendapatan ?? 0, 0, ',', '.') }}
+        </div>
+        <div style="font-size:12px; color:var(--success); margin-top:4px;"><i class="fa-solid fa-arrow-up"></i> Data penjualan terverifikasi</div>
     </div>
     
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(16,185,129,0.1); color:var(--success);"><i class="fa-solid fa-wallet"></i></div>
-        <div style="color:var(--text-muted); font-size:14px; font-weight:600;">Laba Bersih Estimasi</div>
-        <div style="font-size:28px; font-weight:800; margin-top:8px;">Rp 45.2M</div>
-        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Berdasarkan transaksi terverifikasi</div>
+        <div class="stat-icon" style="background:rgba(239,68,68,0.1); color:#ef4444;"><i class="fa-solid fa-money-bill-transfer"></i></div>
+        <div style="color:var(--text-muted); font-size:14px; font-weight:600;">Beban Gaji (Bulan Ini)</div>
+        <div style="font-size:28px; font-weight:800; margin-top:8px;">
+            Rp {{ number_format($bebanGaji->where('bulan', now()->format('Y-m'))->first()->total_beban ?? 0, 0, ',', '.') }}
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Total gaji yang sudah dibayarkan</div>
     </div>
 </div>
 

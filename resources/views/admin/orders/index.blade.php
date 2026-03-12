@@ -12,6 +12,12 @@
 
 <!-- Stat summary -->
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:28px;">
+    <div class="card" style="padding:24px; text-align:center; border: 1px solid var(--border); border-radius:20px; background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%); transition: var(--transition); box-shadow:var(--shadow-sm);" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
+        <div style="font-size:20px; font-weight:800; color: white; letter-spacing:-0.5px;">Rp {{ number_format($stats['total_omzet'], 0, ',', '.') }}</div>
+        <div style="margin-top:8px;">
+            <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.8)">Total Omzet (Lunas)</span>
+        </div>
+    </div>
     @foreach([
         ['label'=>'Menunggu Bayar','key'=>'menunggu','color'=>'#94a3b8', 'bg' => 'var(--bg-card)'],
         ['label'=>'Perlu Diproses','key'=>'perlu_diproses','color'=>'#fb923c', 'bg' => 'var(--bg-card)'],

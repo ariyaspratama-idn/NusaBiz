@@ -120,6 +120,30 @@ class HRController extends Controller
     }
 
     /**
+     * Daftar Riwayat Penggajian (Payroll).
+     */
+    public function payroll()
+    {
+        $payrolls = Penggajian::with('karyawan')->latest('periode_bulan')->paginate(15);
+        return view('admin.hr.payroll', compact('payrolls'));
+    }
+
+    /**
+     * Update status pembayaran gaji.
+     */
+    public function updatePayrollStatus(Request $request, Penggajian $payroll)
+    {
+        $request->validate(['status' => 'required|in:pending,paid']);
+        
+        $payroll->update([
+            'status_pembayaran' => $request->status,
+            'tanggal_dibayar' => $request->status === 'paid' ? now() : null
+        ]);
+
+        return redirect()->back()->with('success', 'Status gaji berhasil diperbarui.');
+    }
+
+    /**
      * Hitung Gaji Bulanan.
      */
     public function hitungGaji($bulan)
@@ -140,11 +164,12 @@ class HRController extends Controller
                     'gaji_pokok' => $k->gaji_pokok,
                     'lembur' => $lembur,
                     'total_gaji' => $k->gaji_pokok + $lembur,
-                    'status_pembayaran' => 'pending'
+                    'status_pembayaran' => 'pending',
+                    'tenant_id' => $k->tenant_id, // Pastikan tenant_id terbawa
                 ]
             );
         }
 
-        return redirect()->back()->with('success', "Gaji periode $bulan berhasil dihitung.");
+        return redirect()->route('hr.payroll')->with('success', "Gaji periode $bulan berhasil dihitung.");
     }
 }

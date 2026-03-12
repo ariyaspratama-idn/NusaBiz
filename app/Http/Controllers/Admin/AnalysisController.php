@@ -15,13 +15,22 @@ class AnalysisController extends Controller
      */
     public function overview()
     {
-        // Tren Pendapatan 6 Bulan Terakhir
+        // Tren Pendapatan & Beban Gaji 6 Bulan Terakhir
         $trenPendapatan = EcOrder::select(
             DB::raw('DATE_FORMAT(paid_at, "%Y-%m") as bulan'),
-            DB::raw('SUM(total) as total')
+            DB::raw('SUM(total) as pendapatan')
         )
         ->where('payment_status', 'paid')
         ->where('paid_at', '>=', now()->subMonths(6))
+        ->groupBy('bulan')
+        ->get();
+
+        $bebanGaji = \App\Models\Penggajian::select(
+            DB::raw('periode_bulan as bulan'),
+            DB::raw('SUM(total_gaji) as total_beban')
+        )
+        ->where('status_pembayaran', 'paid')
+        ->where('periode_bulan', '>=', now()->subMonths(6)->format('Y-m'))
         ->groupBy('bulan')
         ->get();
 
@@ -35,7 +44,7 @@ class AnalysisController extends Controller
             ->limit(5)
             ->get();
 
-        return view('admin.analysis.overview', compact('trenPendapatan', 'topKategori'));
+        return view('admin.analysis.overview', compact('trenPendapatan', 'bebanGaji', 'topKategori'));
     }
 
     /**

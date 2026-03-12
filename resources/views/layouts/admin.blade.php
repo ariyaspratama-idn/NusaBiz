@@ -435,9 +435,31 @@
             <a href="{{ route('operations.index') }}" class="nav-item {{ request()->routeIs('operations*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users-gear"></i> <span>Aktivitas Operasional</span>
             </a>
-            <a href="{{ route('hr.index') }}" class="nav-item {{ request()->routeIs('hr*') ? 'active' : '' }}">
-                <i class="fa-solid fa-user-group"></i> <span>Sumber Daya Manusia (HR)</span>
+            <a href="{{ route('hr.index') }}" class="nav-item {{ request()->routeIs('hr.index') ? 'active' : '' }}">
+                <i class="fa-solid fa-user-group"></i> <span>Daftar Karyawan</span>
             </a>
+            <a href="{{ route('hr.izin.index') }}" class="nav-item {{ request()->routeIs('hr.izin*') ? 'active' : '' }}">
+                <i class="fa-solid fa-calendar-check"></i> <span>Pengajuan Izin</span>
+            </a>
+            <a href="{{ route('hr.payroll') }}" class="nav-item {{ request()->routeIs('hr.payroll*') ? 'active' : '' }}">
+                <i class="fa-solid fa-money-check-dollar"></i> <span>Manajemen Gaji</span>
+            </a>
+
+            <div class="nav-section-title">Modul Bengkel</div>
+            <a href="{{ route('admin.dashboard.bengkel') }}" class="nav-item {{ request()->routeIs('admin.dashboard.bengkel') ? 'active' : '' }}">
+                <i class="fa-solid fa-gauge-high"></i> <span>Dashboard Bengkel</span>
+            </a>
+            <a href="{{ route('admin.bookings.index') }}" class="nav-item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-calendar-plus"></i> <span style="font-size: 13px;">Booking Servis</span>
+            </a>
+            <a href="{{ route('admin.mechanics.index') }}" class="nav-item {{ request()->routeIs('admin.mechanics.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-wrench"></i> <span style="font-size: 13px;">Manajemen Mekanik</span>
+            </a>
+            <a href="{{ route('admin.spare-parts.index') }}" class="nav-item {{ request()->routeIs('admin.spare-parts.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-box-open"></i> <span style="font-size: 13px;">Stok Onderdil</span>
+            </a>
+
+            <div class="nav-section-title">Analisis Bisnis</div>
             <a href="{{ route('analysis.overview') }}" class="nav-item {{ request()->routeIs('analysis.overview') ? 'active' : '' }}">
                 <i class="fa-solid fa-chart-line"></i> <span>Analisis Keuangan</span>
             </a>

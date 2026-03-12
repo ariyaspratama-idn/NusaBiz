@@ -27,6 +27,7 @@ class OrderController extends Controller
         }
         $orders = $query->paginate(15);
         $stats = [
+            'total_omzet'       => EcOrder::where('payment_status', 'paid')->sum('total'),
             'menunggu'          => EcOrder::where('status', 'menunggu_pembayaran')->count(),
             'perlu_diproses'    => EcOrder::where('status', 'perlu_diproses')->count(),
             'diproses'          => EcOrder::where('status', 'diproses')->count(),
