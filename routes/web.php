@@ -67,61 +67,66 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         'role_category' => 'required|in:admin,karyawan',
     ]);
 
-    $input = $request->email;
+    $input = trim($request->email);
     $password = $request->password;
 
     // 1. Coba cari user berdasarkan email langsung
-    $user = \App\Models\User::where('email', $input)->first();
+    $user = \App\Models\User::withoutGlobalScopes()->where('email', $input)->first();
 
     // 2. Jika tidak ketemu, coba cari berdasarkan NIP di tabel karyawans
     if (!$user) {
-        $karyawan = \App\Models\Karyawan::where('nip', $input)->first();
+        $karyawan = \App\Models\Karyawan::withoutGlobalScopes()->where('nip', $input)->first();
         if ($karyawan) {
-            $user = $karyawan->user;
+            $user = $karyawan->withoutGlobalScopes()->user;
         }
     }
 
-    // 3. Jika user ditemukan, lakukan verifikasi password & peran
-    if ($user && \Illuminate\Support\Facades\Hash::check($password, $user->password)) {
-        
-        // Define Role Groups
-        $adminRoles = ['SUPER_ADMIN', 'admin-pusat', 'owner'];
-        $karyawanRoles = ['karyawan', 'kasir', 'kepala-cabang', 'wakil-kepala-cabang', 'mechanic'];
-
-        // Category Validation (User must choose correct login category)
-        if ($request->role_category === 'admin' && !in_array($user->role, $adminRoles)) {
-            return back()->withErrors(['email' => 'Akun Anda (' . $user->role . ') harus login melalui kategori Karyawan.']);
-        }
-        if ($request->role_category === 'karyawan' && !in_array($user->role, $karyawanRoles)) {
-            return back()->withErrors(['email' => 'Akun Anda (' . $user->role . ') harus login melalui kategori Admin Pusat.']);
-        }
-
-        \Illuminate\Support\Facades\Auth::login($user);
-        $request->session()->regenerate();
-
-        // Device Binding Logic
-        if ($request->filled('device_uuid')) {
-            if (!$user->device_uuid) {
-                $user->update(['device_uuid' => $request->device_uuid]);
-            } elseif ($user->device_uuid !== $request->device_uuid) {
-                \Illuminate\Support\Facades\Auth::logout();
-                return back()->withErrors(['email' => 'Sistem mendeteksi akses dari perangkat ilegal. Hubungi IT Support.']);
-            }
-        }
-
-        // Redirect based on role
-        if (in_array($user->role, $adminRoles)) {
-            return redirect()->route('admin.dashboard');
-        }
-
-        if (in_array($user->role, $karyawanRoles)) {
-            return redirect()->route('karyawan.dashboard');
-        }
-
-        return $user->role === 'customer' ? redirect()->route('customer.dashboard') : redirect()->route('home');
+    // 3. Verifikasi Keberadaan User
+    if (!$user) {
+        return back()->withErrors(['email' => 'Nomor WhatsApp / ID / NIP mendeteksi data yang tidak terdaftar di database pusat.'])->withInput();
     }
 
-    return back()->withErrors(['email' => 'Kredensial (ID/Password) tidak ditemukan di database pusat.'])->onlyInput('email');
+    // 4. Verifikasi Password
+    if (!\Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+        return back()->withErrors(['email' => 'Kata Sandi (Password) yang Anda masukkan salah. Mohon periksa kembali.'])->withInput();
+    }
+
+    // 5. Jika password benar, verifikasi peran
+    $adminRoles = ['SUPER_ADMIN', 'admin-pusat', 'owner'];
+    $karyawanRoles = ['karyawan', 'kasir', 'kepala-cabang', 'wakil-kepala-cabang', 'mechanic'];
+
+    // Category Validation
+    if ($request->role_category === 'admin' && !in_array($user->role, $adminRoles)) {
+        return back()->withErrors(['email' => 'Akun ' . $user->name . ' (' . $user->role . ') harus login melalui jalur Karyawan.'])->withInput();
+    }
+    if ($request->role_category === 'karyawan' && !in_array($user->role, $karyawanRoles)) {
+        return back()->withErrors(['email' => 'Akun ' . $user->name . ' (' . $user->role . ') harus login melalui jalur Admin Pusat.'])->withInput();
+    }
+
+    \Illuminate\Support\Facades\Auth::login($user);
+    $request->session()->put('tenant_id', $user->tenant_id); // Set tenant_id in session
+    $request->session()->regenerate();
+
+    // Device Binding Logic
+    if ($request->filled('device_uuid')) {
+        if (!$user->device_uuid) {
+            $user->update(['device_uuid' => $request->device_uuid]);
+        } elseif ($user->device_uuid !== $request->device_uuid) {
+            \Illuminate\Support\Facades\Auth::logout();
+            return back()->withErrors(['email' => 'Sistem mendeteksi akses dari perangkat ilegal. Hubungi IT Support.']);
+        }
+    }
+
+    // Redirect based on role
+    if (in_array($user->role, $adminRoles)) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    if (in_array($user->role, $karyawanRoles)) {
+        return redirect()->route('karyawan.dashboard');
+    }
+
+    return $user->role === 'customer' ? redirect()->route('customer.dashboard') : redirect()->route('home');
 });
 
 // ---- Modul POS (Terminal Kasir) ----
