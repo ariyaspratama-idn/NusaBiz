@@ -68,8 +68,8 @@ class ChatPanelController extends Controller
 
         $session->update(['last_activity_at' => now()]);
 
-        // Broadcast via Reverb (WebSocket) – event akan dibuat nanti
-        // event(new \App\Events\AdminReplied($msg));
+        // Broadcast via Reverb (WebSocket)
+        event(new \App\Events\AdminReplied($msg));
 
         return response()->json([
             'success' => true,

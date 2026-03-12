@@ -435,6 +435,15 @@
             <a href="{{ route('operations.index') }}" class="nav-item {{ request()->routeIs('operations*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users-gear"></i> <span>Aktivitas Operasional</span>
             </a>
+            <a href="{{ route('hr.index') }}" class="nav-item {{ request()->routeIs('hr*') ? 'active' : '' }}">
+                <i class="fa-solid fa-user-group"></i> <span>Sumber Daya Manusia (HR)</span>
+            </a>
+            <a href="{{ route('analysis.overview') }}" class="nav-item {{ request()->routeIs('analysis.overview') ? 'active' : '' }}">
+                <i class="fa-solid fa-chart-line"></i> <span>Analisis Keuangan</span>
+            </a>
+            <a href="{{ route('analysis.maintenance') }}" class="nav-item {{ request()->routeIs('analysis.maintenance') ? 'active' : '' }}">
+                <i class="fa-solid fa-screwdriver-wrench"></i> <span>Analisis Pemeliharaan</span>
+            </a>
 
             <div class="nav-section-title">Konfigurasi Sistem</div>
             <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users*') ? 'active' : '' }}">

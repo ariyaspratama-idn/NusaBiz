@@ -61,8 +61,8 @@ class OrderController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
-        // TODO: Kirim notifikasi WA/Email ke pelanggan di sini
-        // NotificationService::sendOrderUpdate($order);
+        // Kirim notifikasi WA/Email ke pelanggan
+        \App\Services\NotificationService::sendOrderUpdate($order);
 
         return back()->with('success', 'Status pesanan berhasil diperbarui!');
     }

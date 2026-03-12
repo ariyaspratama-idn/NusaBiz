@@ -15,10 +15,10 @@ class ReportController extends Controller
 
     public function profitLoss(Request $request)
     {
-        $branchId = $request->get('branch_id');
-        $division = $request->get('division');
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->toDateString());
+        $branchId = $request->input('branch_id');
+        $division = $request->input('division');
+        $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', now()->toDateString());
 
         // Previous Period Calculation for Growth Metrics
         $startComp = \Carbon\Carbon::parse($startDate);
@@ -35,7 +35,16 @@ class ReportController extends Controller
             ->whereBetween('transaction_date', [$startDate, $endDate]);
 
         $revenue = (clone $query)->whereHas('account', fn($q) => $q->where('type', 'REVENUE'))->sum('amount');
-        $expense = (clone $query)->whereHas('account', fn($q) => $q->where('type', 'EXPENSE'))->sum('amount');
+        
+        // Split COGS (HPP) from general Expenses
+        $hpp = (clone $query)->whereHas('account', fn($q) => $q->where('name', 'like', '%HPP%')->orWhere('name', 'like', '%Harga Pokok Penjualan%'))->sum('amount');
+        $expense = (clone $query)->whereHas('account', fn($q) => $q->where('type', 'EXPENSE')
+            ->where('name', 'not like', '%HPP%')
+            ->where('name', 'not like', '%Harga Pokok Penjualan%')
+        )->sum('amount');
+
+        $grossProfit = $revenue - $hpp;
+        $netProfit = $grossProfit - $expense;
 
         // Previous Period Data
         $prevQuery = Transaction::query()
@@ -44,18 +53,33 @@ class ReportController extends Controller
             ->whereBetween('transaction_date', [$prevStartDate->toDateString(), $prevEndDate->toDateString()]);
 
         $prevRevenue = (clone $prevQuery)->whereHas('account', fn($q) => $q->where('type', 'REVENUE'))->sum('amount');
-        $prevExpense = (clone $prevQuery)->whereHas('account', fn($q) => $q->where('type', 'EXPENSE'))->sum('amount');
+        $prevHpp = (clone $prevQuery)->whereHas('account', fn($q) => $q->where('name', 'like', '%HPP%')->orWhere('name', 'like', '%Harga Pokok Penjualan%'))->sum('amount');
+        $prevExpense = (clone $prevQuery)->whereHas('account', fn($q) => $q->where('type', 'EXPENSE')
+            ->where('name', 'not like', '%HPP%')
+            ->where('name', 'not like', '%Harga Pokok Penjualan%')
+        )->sum('amount');
+
+        $prevGrossProfit = $prevRevenue - $prevHpp;
+        $prevNetProfit = $prevGrossProfit - $prevExpense;
 
         // Growth percentages
         $revGrowth = $prevRevenue > 0 ? (($revenue - $prevRevenue) / $prevRevenue) * 100 : 0;
         $expGrowth = $prevExpense > 0 ? (($expense - $prevExpense) / $prevExpense) * 100 : 0;
+        $netGrowth = $prevNetProfit != 0 ? (($netProfit - $prevNetProfit) / abs($prevNetProfit)) * 100 : 0;
 
         // Breakdown details
         $revenueDetails = (clone $query)->whereHas('account', fn($q) => $q->where('type', 'REVENUE'))
             ->selectRaw('account_id, sum(amount) as total')
             ->groupBy('account_id')->with('account')->get();
 
-        $expenseDetails = (clone $query)->whereHas('account', fn($q) => $q->where('type', 'EXPENSE'))
+        $hppDetails = (clone $query)->whereHas('account', fn($q) => $q->where('name', 'like', '%HPP%')->orWhere('name', 'like', '%Harga Pokok Penjualan%'))
+            ->selectRaw('account_id, sum(amount) as total')
+            ->groupBy('account_id')->with('account')->get();
+
+        $expenseDetails = (clone $query)->whereHas('account', fn($q) => $q->where('type', 'EXPENSE')
+            ->where('name', 'not like', '%HPP%')
+            ->where('name', 'not like', '%Harga Pokok Penjualan%')
+        )
             ->selectRaw('account_id, sum(amount) as total')
             ->groupBy('account_id')->with('account')->get();
 
@@ -67,15 +91,19 @@ class ReportController extends Controller
 
         if ($request->has('print')) {
             return view('reports.print_profit_loss', compact(
-                'revenue', 'expense', 'prevRevenue', 'prevExpense', 'revGrowth', 'expGrowth',
-                'revenueDetails', 'expenseDetails', 'recentTransactions', 'branches', 'divisions',
+                'revenue', 'hpp', 'expense', 'grossProfit', 'netProfit',
+                'prevRevenue', 'prevHpp', 'prevExpense', 'prevGrossProfit', 'prevNetProfit',
+                'revGrowth', 'expGrowth', 'netGrowth',
+                'revenueDetails', 'hppDetails', 'expenseDetails', 'recentTransactions', 'branches', 'divisions',
                 'branchId', 'division', 'startDate', 'endDate'
             ));
         }
 
         return view('reports.profit_loss', compact(
-            'revenue', 'expense', 'prevRevenue', 'prevExpense', 'revGrowth', 'expGrowth',
-            'revenueDetails', 'expenseDetails', 'recentTransactions', 'branches', 'divisions',
+            'revenue', 'hpp', 'expense', 'grossProfit', 'netProfit',
+            'prevRevenue', 'prevHpp', 'prevExpense', 'prevGrossProfit', 'prevNetProfit',
+            'revGrowth', 'expGrowth', 'netGrowth',
+            'revenueDetails', 'hppDetails', 'expenseDetails', 'recentTransactions', 'branches', 'divisions',
             'branchId', 'division', 'startDate', 'endDate'
         ));
     }
@@ -89,10 +117,10 @@ class ReportController extends Controller
 
     public function exportCsv(Request $request)
     {
-        $branchId = $request->get('branch_id');
-        $division = $request->get('division');
-        $startDate = $request->get('start_date');
-        $endDate = $request->get('end_date');
+        $branchId = $request->input('branch_id');
+        $division = $request->input('division');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
         $transactions = Transaction::with(['branch', 'account'])
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))

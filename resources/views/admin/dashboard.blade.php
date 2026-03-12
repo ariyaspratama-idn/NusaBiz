@@ -53,6 +53,69 @@
 
 </div>
 
+<!-- Quick Actions -->
+<div class="card" style="margin-bottom: 32px; padding: 20px; display: flex; align-items: center; justify-content: space-between; background: var(--sidebar-bg);">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="width: 50px; height: 50px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            <i class="fa-solid fa-user-check"></i>
+        </div>
+        <div>
+            <div style="font-weight: 700; font-size: 16px;">Halo, {{ auth()->user()->name }}!</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Sudahkah Anda absen hari ini?</div>
+        </div>
+    </div>
+    <button id="btnAbsenCepat" class="btn btn-primary" style="padding: 12px 24px;">
+        <i class="fa-solid fa-clock"></i> <span>Absen Sekarang</span>
+    </button>
+</div>
+
+<script>
+document.getElementById('btnAbsenCepat').addEventListener('click', function() {
+    if (!navigator.geolocation) {
+        alert('Geolocation tidak didukung oleh browser Anda.');
+        return;
+    }
+
+    this.disabled = true;
+    this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Memproses...</span>';
+
+    navigator.geolocation.getCurrentPosition((position) => {
+        const data = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+            foto: null // Dummy for now
+        };
+
+        fetch('/api/hr/absen', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            alert(res.message);
+            location.reload();
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Gagal melakukan absensi.');
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.innerHTML = '<i class="fa-solid fa-clock"></i> <span>Absen Sekarang</span>';
+        });
+    }, (err) => {
+        alert('Gagal mendapatkan lokasi: ' + err.message);
+        this.disabled = false;
+        this.innerHTML = '<i class="fa-solid fa-clock"></i> <span>Absen Sekarang</span>';
+    });
+});
+</script>
+
 <!-- Latest Orders -->
 <div class="card">
     <div class="card-header">

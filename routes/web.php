@@ -325,6 +325,19 @@ Route::middleware(['auth', 'role:customer'])
         Route::get('membership-card', [MembershipCardController::class, 'show'])->name('membership-card');
     });
 
+// ---- Sistem HR & Analisis Lanjutan ----
+Route::middleware(['auth', 'role:SUPER_ADMIN,ADMIN_OPERASIONAL'])
+    ->prefix('admin-dashboard')
+    ->group(function () {
+    Route::get('hr', [\App\Http\Controllers\Admin\HRController::class, 'index'])->name('hr.index');
+    Route::post('hr/karyawan', [\App\Http\Controllers\Admin\HRController::class, 'storeKaryawan'])->name('hr.karyawan.store');
+    Route::get('hr/izin', [\App\Http\Controllers\Admin\HRController::class, 'daftarIzin'])->name('hr.izin.index');
+    Route::post('hr/hitung-gaji/{bulan}', [\App\Http\Controllers\Admin\HRController::class, 'hitungGaji'])->name('hr.gaji.hitung');
+
+    Route::get('analysis/overview', [\App\Http\Controllers\Admin\AnalysisController::class, 'overview'])->name('analysis.overview');
+    Route::get('analysis/maintenance', [\App\Http\Controllers\Admin\AnalysisController::class, 'maintenanceAnalytics'])->name('analysis.maintenance');
+});
+
 /* ============================================================
  *  LANGUAGE SWITCHER
  * ============================================================ */

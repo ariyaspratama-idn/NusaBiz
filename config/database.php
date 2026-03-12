@@ -56,13 +56,11 @@ return [
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA') 
-                    ? (file_exists(env('MYSQL_ATTR_SSL_CA')) ? env('MYSQL_ATTR_SSL_CA') : base_path(env('MYSQL_ATTR_SSL_CA'))) 
-                    : null,
-            ]) : [],
+            'options' => [
+                \PDO::MYSQL_ATTR_SSL_CA => base_path('storage/tidb-ca.pem'),
+                \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+            ],
+            'sslmode' => 'require',
         ],
 
         'mariadb' => [
@@ -80,9 +78,12 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => [
+                // 1012 = PDO::MYSQL_ATTR_SSL_CA
+                1012 => env('MYSQL_ATTR_SSL_CA', __DIR__ . '/../storage/cacert.pem'),
+                // 1014 = PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
+                1014 => false,
+            ],
         ],
 
         'pgsql' => [

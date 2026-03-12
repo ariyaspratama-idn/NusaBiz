@@ -24,7 +24,7 @@ class OperationalController extends Controller
             $selectedBranchId = $user->branch_id;
         } else {
             $branches = Branch::where('is_active', true)->get();
-            $selectedBranchId = $request->get('branch_id') ?? ($branches->first()->id ?? null);
+            $selectedBranchId = $request->input('branch_id') ?? ($branches->first()->id ?? null);
         }
 
         $selectedBranch = $selectedBranchId ? Branch::find($selectedBranchId) : null;

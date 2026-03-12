@@ -23,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'device-lock' => \App\Http\Middleware\DeviceLock::class,
             'ensure-cashier-session' => \App\Http\Middleware\EnsureCashierSession::class,
         ]);
+
+        $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

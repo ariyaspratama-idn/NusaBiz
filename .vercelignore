@@ -1,9 +1,70 @@
-/node_modules
-/vendor
-/storage/*.key
+# ===================================================
+# VERCELIGNORE – NusaBiz Laravel App
+# Tujuan: Mengecualikan semua file yang tidak diperlukan
+# agar ukuran Serverless Function < 250MB
+# ===================================================
+
+# === Submodul / Proyek lain yang tidak relevan ===
+absenv-final-clean/
+bengkel-motor/
+files.txt
+
+# === Dependencies (akan di-install via Composer di Vercel) ===
+vendor/
+node_modules/
+.npm/
+.cache/
+
+# === Git & CI ===
+.git/
+.github/
+
+# === Storage / Cache yang besar ===
+storage/logs/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/app/
+
+# === File Build Frontend (sudah di-build ke public/) ===
+resources/css/
+resources/js/
+resources/assets/
+vite.config.js
+tailwind.config.js
+postcss.config.js
+package.json
+package-lock.json
+yarn.lock
+
+# === Konfigurasi Dev & Testing ===
+tests/
+phpunit.xml
 .env
-/public/hot
-/public/storage
-/storage/framework/cache/*
-/storage/framework/sessions/*
-/storage/framework/views/*
+.env.example
+docker-compose.yml
+Dockerfile
+.dockerignore
+auth.json
+.phpactor.json
+
+# === Lock files (Composer akan resolve sendiri) ===
+composer.lock
+
+# === File Build & Deployment ===
+.vercel/
+public/storage/
+public/hot/
+
+# === File markdown & dokumentasi ===
+*.md
+docs/
+backup/
+tmp/
+*.sh
+
+# === Database SQLite (gunakan TiDB Cloud di produksi) ===
+database/database.sqlite
+
+# === File log besar ===
+*.log

@@ -11,7 +11,7 @@ class ComplianceController extends Controller
 {
     public function monitor(Request $request)
     {
-        $date = $request->get('date', now()->toDateString());
+        $date = $request->input('date', now()->toDateString());
         $branches = Branch::with(['sops', 'sopLogs' => function($q) use ($date) {
             $q->where('date', $date);
         }])->where('is_active', true)->get();
@@ -36,7 +36,7 @@ class ComplianceController extends Controller
 
     public function stockMonitor(Request $request)
     {
-        $branchId = $request->get('branch_id');
+        $branchId = $request->input('branch_id');
         $stocks = \App\Models\StockRequest::with(['branch', 'user'])
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->latest()
@@ -48,7 +48,7 @@ class ComplianceController extends Controller
 
     public function complaintMonitor(Request $request)
     {
-        $branchId = $request->get('branch_id');
+        $branchId = $request->input('branch_id');
         $complaints = \App\Models\Complaint::with(['branch', 'user'])
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->latest()
