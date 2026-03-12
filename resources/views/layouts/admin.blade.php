@@ -449,13 +449,13 @@
             <a href="{{ route('bengkel.admin.bookings.index') }}" class="nav-item {{ request()->routeIs('bengkel.admin*') ? 'active' : '' }}">
                 <i class="fa-solid fa-gauge-high"></i> <span>Dashboard Bengkel</span>
             </a>
-            <a href="{{ route('admin.bookings.index') }}" class="nav-item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
+            <a href="{{ route('bengkel.admin.bookings.index') }}" class="nav-item {{ request()->routeIs('bengkel.admin.bookings*') ? 'active' : '' }}">
                 <i class="fa-solid fa-calendar-plus"></i> <span style="font-size: 13px;">Booking Servis</span>
             </a>
-            <a href="{{ route('admin.mechanics.index') }}" class="nav-item {{ request()->routeIs('admin.mechanics.*') ? 'active' : '' }}">
+            <a href="{{ route('bengkel.admin.mechanics.index') }}" class="nav-item {{ request()->routeIs('bengkel.admin.mechanics*') ? 'active' : '' }}">
                 <i class="fa-solid fa-wrench"></i> <span style="font-size: 13px;">Manajemen Mekanik</span>
             </a>
-            <a href="{{ route('admin.spare-parts.index') }}" class="nav-item {{ request()->routeIs('admin.spare-parts.*') ? 'active' : '' }}">
+            <a href="{{ route('bengkel.admin.spare-parts.index') }}" class="nav-item {{ request()->routeIs('bengkel.admin.spare-parts*') ? 'active' : '' }}">
                 <i class="fa-solid fa-box-open"></i> <span style="font-size: 13px;">Stok Onderdil</span>
             </a>
 
