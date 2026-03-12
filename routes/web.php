@@ -77,7 +77,7 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
     if (!$user) {
         $karyawan = \App\Models\Karyawan::withoutGlobalScopes()->where('nip', $input)->first();
         if ($karyawan) {
-            $user = $karyawan->withoutGlobalScopes()->user;
+            $user = \App\Models\User::withoutGlobalScopes()->find($karyawan->user_id);
         }
     }
 
@@ -166,19 +166,25 @@ Route::middleware(['auth', 'role:SUPER_ADMIN,ADMIN_OPERASIONAL,EDITOR_KONTEN'])
         ];
         $latestOrders = \App\Models\EcOrder::latest()->limit(5)->get();
         return view('admin.dashboard', compact('stats', 'latestOrders'));
-    })->name('dashboard');
-
-    /* ============================================================
-     *  KARYAWAN DASHBOARD (Auth + Karyawan Role Required)
-     * ============================================================ */
-    Route::middleware(['auth', 'role:karyawan,kasir,kepala-cabang,wakil-kepala-cabang,mechanic'])
-        ->prefix('karyawan-dashboard')
-        ->name('karyawan.')
-        ->group(function () {
-            
-        Route::get('/', [\App\Http\Controllers\Karyawan\DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/payroll', [\App\Http\Controllers\Karyawan\DashboardController::class, 'payroll'])->name('payroll');
     });
+});
+
+/* ============================================================
+ *  KARYAWAN DASHBOARD (Auth + Karyawan Role Required)
+ * ============================================================ */
+Route::middleware(['auth', 'role:karyawan,kasir,kepala-cabang,wakil-kepala-cabang,mechanic'])
+    ->prefix('karyawan-dashboard')
+    ->name('karyawan.')
+    ->group(function () {
+        
+    Route::get('/', [\App\Http\Controllers\Karyawan\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/payroll', [\App\Http\Controllers\Karyawan\DashboardController::class, 'payroll'])->name('payroll');
+});
+
+Route::middleware(['auth', 'role:SUPER_ADMIN,ADMIN_OPERASIONAL,EDITOR_KONTEN'])
+    ->prefix('admin-dashboard')
+    ->name('admin.')
+    ->group(function () {
 
     // ---- Manajemen Produk ----
     Route::resource('products', AdminProductController::class);
