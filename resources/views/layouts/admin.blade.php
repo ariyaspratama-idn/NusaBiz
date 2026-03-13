@@ -373,10 +373,10 @@
     @stack('styles')
 </head>
 <body>
-    <!-- Global Loader -->
+    <!-- Global Loading Screen -->
     <div id="global-loader">
         <div class="loader-content">
-            <img src="{{ asset('img/loading-icon.png') }}" alt="Loading..." class="loader-logo">
+            <img src="{{ asset('img/logo-nusabiz.png') }}?v=1.1" alt="Memuat..." class="loader-logo" onerror="this.src='{{ asset('img/loading-icon.png') }}'">
             <div class="loader-bar">
                 <div class="loader-progress"></div>
             </div>
