@@ -26,38 +26,43 @@
                     @endif
                 </div>
 
-                <!-- Info -->
-                <div style="flex:1;min-width:200px;">
-                    <h2 style="font-size:22px;font-weight:800;color:white;margin-bottom:4px;">Halo, {{ $karyawan->nama_lengkap }}! 👋</h2>
-                    <p style="color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:12px;">
-                        <i class="fa-solid fa-id-badge" style="margin-right:6px;color:#a5b4fc;"></i>NIP: <strong style="color:#a5b4fc;">{{ $karyawan->nip }}</strong>
-                        &nbsp;•&nbsp;
-                        <i class="fa-solid fa-building" style="margin-right:4px;color:#a5b4fc;"></i>{{ $karyawan->branch->name ?? 'Pusat' }}
-                        &nbsp;•&nbsp;
-                        <i class="fa-solid fa-briefcase" style="margin-right:4px;color:#a5b4fc;"></i>{{ ucfirst(auth()->user()->role ?? '-') }}
-                    </p>
+                <!-- Area Konten & Tombol (Kolom) -->
+                <div style="flex:1; display:flex; flex-direction:column; gap:20px; z-index:1;">
+                    
+                    <!-- Baris Info & Jam Real-time -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+                        <!-- Info -->
+                        <div style="flex:1;min-width:200px;">
+                            <h2 style="font-size:22px;font-weight:800;color:white;margin-bottom:4px;">Halo, {{ $karyawan->nama_lengkap }}! 👋</h2>
+                            <p style="color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:12px;">
+                                <i class="fa-solid fa-id-badge" style="margin-right:6px;color:#a5b4fc;"></i>NIP: <strong style="color:#a5b4fc;">{{ $karyawan->nip }}</strong>
+                                &nbsp;•&nbsp;
+                                <i class="fa-solid fa-building" style="margin-right:4px;color:#a5b4fc;"></i>{{ $karyawan->branch->name ?? 'Pusat' }}
+                                &nbsp;•&nbsp;
+                                <i class="fa-solid fa-briefcase" style="margin-right:4px;color:#a5b4fc;"></i>{{ ucfirst(auth()->user()->role ?? '-') }}
+                            </p>
 
-                    @if(!$absensi)
-                        <span style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;">
-                            <i class="fa-solid fa-clock"></i> Belum Absen Masuk
-                        </span>
-                    @elseif(!$absensi->jam_pulang)
-                        <span style="background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;">
-                            <i class="fa-solid fa-circle-check"></i> Sudah Absen Masuk — {{ \Carbon\Carbon::parse($absensi->jam_masuk)->format('H:i') }}
-                        </span>
-                    @else
-                        <span style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;">
-                            <i class="fa-solid fa-flag-checkered"></i> Shift Selesai — Pulang {{ \Carbon\Carbon::parse($absensi->jam_pulang)->format('H:i') }}
-                        </span>
-                    @endif
-                </div>
+                            @if(!$absensi)
+                                <span style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;">
+                                    <i class="fa-solid fa-clock"></i> Belum Absen Masuk
+                                </span>
+                            @elseif(!$absensi->jam_pulang)
+                                <span style="background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;">
+                                    <i class="fa-solid fa-circle-check"></i> Sudah Absen Masuk — {{ \Carbon\Carbon::parse($absensi->jam_masuk)->format('H:i') }}
+                                </span>
+                            @else
+                                <span style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;">
+                                    <i class="fa-solid fa-flag-checkered"></i> Shift Selesai — Pulang {{ \Carbon\Carbon::parse($absensi->jam_pulang)->format('H:i') }}
+                                </span>
+                            @endif
+                        </div>
 
-                <!-- Jam Real-time -->
-                <div style="text-align:center;flex-shrink:0;">
-                    <div id="realtimeClock" style="font-size:28px;font-weight:900;color:white;font-variant-numeric:tabular-nums;letter-spacing:2px;"></div>
-                    <div id="realtimeDate" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"></div>
-                </div>
-            </div>
+                        <!-- Jam Real-time -->
+                        <div style="text-align:center;flex-shrink:0;">
+                            <div id="realtimeClock" style="font-size:28px;font-weight:900;color:white;font-variant-numeric:tabular-nums;letter-spacing:2px;"></div>
+                            <div id="realtimeDate" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"></div>
+                        </div>
+                    </div>
 
             <!-- Tombol Aksi Tambahan (Izin & Profil) -->
             <div style="margin-top:20px;padding-top:20px;border-top:1px dashed rgba(255,255,255,0.1);display:flex;gap:12px;flex-wrap:wrap;">

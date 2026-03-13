@@ -497,22 +497,13 @@
             </a>
             @endif
         </nav>
-        <div class="sidebar-footer">
-            <div class="sidebar-user" style="display:flex; align-items:center; gap:12px; padding:16px; background: rgba(255,255,255,0.03); border-radius:16px; margin:10px;">
-                <div style="width:40px;height:40px;background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                    {{ auth()->user() ? strtoupper(substr(auth()->user()->name, 0, 1)) : 'A' }}
-                </div>
-                <div class="user-info" style="flex:1;">
-                    <div class="name" style="color:white; font-size:13px; font-weight:600;">{{ auth()->user()?->name ?? 'Admin' }}</div>
-                    <div class="role" style="color:var(--sidebar-text); font-size:11px;">{{ str_replace('_', ' ', auth()->user()?->role ?? 'SUPER ADMIN') }}</div>
-                </div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" style="background:none;border:none;color:var(--sidebar-text);cursor:pointer;font-size:16px;transition:var(--transition);" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--sidebar-text)'" title="Logout">
-                        <i class="fa-solid fa-power-off"></i>
-                    </button>
-                </form>
-            </div>
+        <div class="sidebar-footer" style="padding: 10px; display:flex; justify-content:center; padding-bottom: 20px;">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); width:48px; height:48px; border-radius:14px; color:var(--sidebar-text); cursor:pointer; font-size:18px; transition:all 0.2s; display:flex; justify-content:center; align-items:center;" onmouseover="this.style.color='#ef4444'; this.style.background='rgba(239, 68, 68, 0.1)'; this.style.borderColor='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.color='var(--sidebar-text)'; this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'" title="Logout">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </form>
         </div>
     </aside>
 
