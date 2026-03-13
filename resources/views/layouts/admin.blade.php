@@ -376,7 +376,7 @@
     <!-- Global Loading Screen -->
     <div id="global-loader">
         <div class="loader-content">
-            <img src="{{ asset('img/logo-nusabiz.png') }}?v=1.2" alt="Memuat..." class="loader-logo" onerror="this.onerror=null; this.src='{{ asset('img/loading-icon.png') }}';">
+            <img src="{{ asset('img/logo-nusabiz.png') }}?v=1.2" alt="Memuat..." class="loader-logo">
             <div class="loader-bar">
                 <div class="loader-progress"></div>
             </div>
@@ -387,7 +387,7 @@
     <aside id="sidebar">
         <a href="{{ route('admin.dashboard') }}" class="sidebar-logo">
             <div class="logo-wrapper">
-                <img src="{{ asset('img/logo-nusabiz.png') }}?v=1.2" alt="NusaBiz Logo" class="logo-img" onerror="this.onerror=null; this.src='{{ asset('img/loading-icon.png') }}';">
+                <img src="{{ asset('img/logo-nusabiz.png') }}?v=1.2" alt="NusaBiz Logo" class="logo-img">
             </div>
         </a>
         <nav class="sidebar-nav">
