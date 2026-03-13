@@ -58,6 +58,16 @@
                     <div id="realtimeDate" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"></div>
                 </div>
             </div>
+
+            <!-- Tombol Aksi Tambahan (Izin & Profil) -->
+            <div style="margin-top:20px;padding-top:20px;border-top:1px dashed rgba(255,255,255,0.1);display:flex;gap:12px;flex-wrap:wrap;">
+                <button onclick="document.getElementById('modalIzin').style.display='flex'" class="btn" style="flex:1;background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;font-weight:600;min-width:200px;transition:all 0.2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <i class="fa-solid fa-calendar-plus" style="color:#a5b4fc;margin-right:8px;"></i>Pengajuan Izin / Cuti / Lembur
+                </button>
+                <button onclick="document.getElementById('modalProfile').style.display='flex'" class="btn" style="flex:1;background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;font-weight:600;min-width:200px;transition:all 0.2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <i class="fa-solid fa-user-gear" style="color:#a5b4fc;margin-right:8px;"></i>Pengaturan Profil / Telegram
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -287,6 +297,87 @@
     </div>
 </div>
 
+<!-- ======================================================
+     MODAL PENGAJUAN IZIN / LEMBUR
+     ====================================================== -->
+<div id="modalIzin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--card-bg);width:100%;max-width:500px;border-radius:24px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);">
+        <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin:0;font-size:18px;font-weight:700;"><i class="fa-solid fa-file-signature text-primary me-2"></i>Pengajuan Kehadiran</h3>
+            <button onclick="document.getElementById('modalIzin').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">&times;</button>
+        </div>
+        <div style="padding:24px;">
+            <form action="{{ route('karyawan.izin.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="lat" id="izinLat">
+                <input type="hidden" name="lon" id="izinLon">
+
+                <div class="form-group mb-3">
+                    <label style="font-size:13px;color:var(--text-muted);margin-bottom:6px;display:block;">Tipe Pengajuan <span class="text-danger">*</span></label>
+                    <select name="tipe" class="form-control" required style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:var(--text-main);border-radius:10px;">
+                        <option value="">-- Pilih Tipe --</option>
+                        <option value="izin">Izin Tidak Masuk</option>
+                        <option value="sakit">Sakit</option>
+                        <option value="cuti">Cuti Tahunan</option>
+                        @if($absensi && !$absensi->jam_pulang)
+                            <option value="lembur">Lembur (Masih di Lokasi Kerja)</option>
+                        @endif
+                    </select>
+                    @if($absensi && !$absensi->jam_pulang)
+                        <small style="color:#fbbf24;display:block;margin-top:6px;"><i class="fa-solid fa-circle-exclamation"></i> Pilih "Lembur" hanya jika Anda diminta OT sebelum jam pulang.</small>
+                    @endif
+                </div>
+
+                <div class="form-group mb-3">
+                    <label style="font-size:13px;color:var(--text-muted);margin-bottom:6px;display:block;">Alasan / Keterangan <span class="text-danger">*</span></label>
+                    <textarea name="alasan" class="form-control" rows="3" required placeholder="Tulis keterangan detail..." style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:var(--text-main);border-radius:10px;resize:none;"></textarea>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label style="font-size:13px;color:var(--text-muted);margin-bottom:6px;display:block;">Lampiran Bukti (Foto/PDF) <span class="text-danger">*</span></label>
+                    <input type="file" name="bukti" class="form-control" accept="image/*,.pdf" required style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:var(--text-main);border-radius:10px;">
+                    <small style="color:var(--text-muted);display:block;margin-top:6px;">Wajib melampirkan surat dokter/bukti kegiatan kerja tambahan.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3" style="border-radius:12px;font-weight:700;">
+                    Kirim Pengajuan
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================
+     MODAL PENGATURAN PROFIL
+     ====================================================== -->
+<div id="modalProfile" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--card-bg);width:100%;max-width:400px;border-radius:24px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);">
+        <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin:0;font-size:18px;font-weight:700;"><i class="fa-solid fa-user-gear text-primary me-2"></i>Pengaturan Profil</h3>
+            <button onclick="document.getElementById('modalProfile').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">&times;</button>
+        </div>
+        <div style="padding:24px;">
+            <form action="{{ route('karyawan.profile.update') }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <div class="form-group mb-4">
+                    <label style="font-size:13px;color:var(--text-muted);margin-bottom:6px;display:block;">Nomor Telepon / WhatsApp / Telegram</label>
+                    <div style="position:relative;">
+                        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#a5b4fc;"><i class="fa-brands fa-telegram"></i></span>
+                        <input type="text" name="no_hp" value="{{ $karyawan->no_hp }}" class="form-control" placeholder="Contoh: 08123456789" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:var(--text-main);border-radius:10px;padding-left:40px;">
+                    </div>
+                    <small style="color:var(--text-muted);display:block;margin-top:6px;">Nomor ini digunakan untuk mengirimkan notifikasi dari Bot Telegram sistem.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3" style="border-radius:12px;font-weight:700;">
+                    Simpan Perubahan
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 // ========= REAL-TIME CLOCK =========
 function updateClock() {
@@ -334,7 +425,14 @@ function detectGPS() {
             }
         } catch(e) {}
 
+        // Set value hidden input izin lembur
+        const izinLat = document.getElementById('izinLat');
+        const izinLon = document.getElementById('izinLon');
+        if(izinLat) izinLat.value = currentLat;
+        if(izinLon) izinLon.value = currentLon;
+
         document.getElementById('gpsStatusText').innerHTML = `✅ <strong style="color:#4ade80;">Lokasi ditemukan:</strong> ${locText}`;
+
         const ol = document.getElementById('overlayLoc');
         if (ol) ol.textContent = '📍 ' + locText;
         document.getElementById('gpsStatus').style.borderColor = 'rgba(34,197,94,0.4)';

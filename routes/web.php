@@ -104,6 +104,8 @@ Route::middleware(['auth', 'role:karyawan,kasir,kepala-cabang,wakil-kepala-caban
     ->group(function () {
         Route::get('/', [\App\Http\Controllers\Karyawan\DashboardController::class, 'index'])->name('dashboard');
         Route::get('/payroll', [\App\Http\Controllers\Karyawan\DashboardController::class, 'payroll'])->name('payroll');
+        Route::post('/izin', [\App\Http\Controllers\Karyawan\DashboardController::class, 'storeIzin'])->name('izin.store');
+        Route::put('/profile', [\App\Http\Controllers\Karyawan\DashboardController::class, 'updateProfile'])->name('profile.update');
     });
 
 /* ============================================================
