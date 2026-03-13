@@ -10,7 +10,7 @@
     <div class="col-12">
         <div class="card" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e293b 100%); border: 1px solid rgba(99,102,241,0.3); border-radius: 24px; padding: 28px; position:relative; overflow:hidden;">
             <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:rgba(99,102,241,0.08);border-radius:50%;"></div>
-            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
                 <!-- Avatar / Foto -->
                 <div style="position:relative;flex-shrink:0;">
                     @if($absensi && $absensi->foto_masuk)
@@ -63,14 +63,16 @@
                             <div id="realtimeDate" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"></div>
                         </div>
                     </div>
+                </div>
+            </div>
 
             <!-- Tombol Aksi Tambahan (Izin & Profil) -->
-            <div style="margin-top:20px;padding-top:20px;border-top:1px dashed rgba(255,255,255,0.1);display:flex;gap:12px;flex-wrap:wrap;">
-                <button onclick="document.getElementById('modalIzin').style.display='flex'" class="btn" style="flex:1;background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;font-weight:600;min-width:200px;transition:all 0.2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                    <i class="fa-solid fa-calendar-plus" style="color:#a5b4fc;margin-right:8px;"></i>Pengajuan Izin / Cuti / Lembur
+            <div style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:16px;flex-wrap:wrap;">
+                <button onclick="document.getElementById('modalIzin').style.display='flex'" class="btn" style="flex:1;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);border-radius:12px;padding:14px;font-size:14px;font-weight:700;min-width:200px;transition:all 0.2s;text-align:center;cursor:pointer;" onmouseover="this.style.background='rgba(99,102,241,0.25)';this.style.color='#fff'" onmouseout="this.style.background='rgba(99,102,241,0.1)';this.style.color='#a5b4fc'">
+                    <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i>Pengajuan Izin / Cuti / Lembur
                 </button>
-                <button onclick="document.getElementById('modalProfile').style.display='flex'" class="btn" style="flex:1;background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;font-weight:600;min-width:200px;transition:all 0.2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                    <i class="fa-solid fa-user-gear" style="color:#a5b4fc;margin-right:8px;"></i>Pengaturan Profil / Telegram
+                <button onclick="document.getElementById('modalProfile').style.display='flex'" class="btn" style="flex:1;background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px;font-size:14px;font-weight:700;min-width:200px;transition:all 0.2s;text-align:center;cursor:pointer;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <i class="fa-solid fa-user-gear" style="margin-right:8px;"></i>Pengaturan Profil / Telegram
                 </button>
             </div>
         </div>
