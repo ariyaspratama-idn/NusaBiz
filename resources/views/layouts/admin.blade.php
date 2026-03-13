@@ -387,7 +387,7 @@
     <aside id="sidebar">
         <a href="{{ route('admin.dashboard') }}" class="sidebar-logo">
             <div class="logo-wrapper">
-                <img src="{{ asset('img/logo-nusabiz.png') }}" alt="NusaBiz Logo" class="logo-img">
+                <img src="{{ asset('img/logo-nusabiz.png') }}?v=1.1" alt="NusaBiz Logo" class="logo-img" onerror="this.src='{{ asset('img/loading-icon.png') }}'">
             </div>
         </a>
         <nav class="sidebar-nav">
